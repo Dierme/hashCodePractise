@@ -6,13 +6,13 @@ class TaskReader(object):
 
         parseResult = self.__parse_file()
 
-        self.__rows = parseResult['rows']
+        self.__rows = int(parseResult['rows'])
 
-        self.__cols = parseResult['cols']
+        self.__cols = int(parseResult['cols'])
 
-        self.__min = parseResult['min']
+        self.__min = int(parseResult['min'])
 
-        self.__max = parseResult['max']
+        self.__max = int(parseResult['max'])
 
         self.__matrix = self.compose_matrix(parseResult['matrix'])
 
