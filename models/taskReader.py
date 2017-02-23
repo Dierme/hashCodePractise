@@ -2,66 +2,70 @@ class TaskReader(object):
 
     def __init__(self, filepath):
 
-        self.__filepath = filepath
+        self.__file = open(filepath, 'r')
 
-        parseResult = self.__parse_file()
+        self.n_videos = 1
+        self.n_endpoints = 1
+        self.n_req_desc = 1
+        self.n_caches = 1
+        self.cash_size = 1
 
-        self.__rows = int(parseResult['rows'])
+        self.__parse_first_line()
 
-        self.__cols = int(parseResult['cols'])
+        self.video_size = self.__parse_video_size()
 
-        self.__min = int(parseResult['min'])
+        self.datacenter = [0 for k in range(0, self.n_endpoints)]
 
-        self.__max = int(parseResult['max'])
+        self.latency = self.__parse_endpoints()
 
-        self.__matrix = self.compose_matrix(parseResult['matrix'])
+        self.requests = self.__parse_requests()
 
-    def __parse_file(self):
-        file = open(self.__filepath, 'r')
+    def __parse_first_line(self):
 
-        first_line = file.readline().strip().split(' ')
+        first_line = self.__file.readline().strip().split(' ')
 
-        matrix_unformated = file.readlines()
+        self.n_videos = int(first_line[0])
+        self.n_endpoints = int(first_line[1])
+        self.n_req_desc = int(first_line[2])
+        self.n_caches = int(first_line[3])
+        self.cash_size = int(first_line[4])
 
-        parse_result = {
-            'rows' : first_line[0],
-            'cols' : first_line[1],
-            'min'  : first_line[2],
-            'max'  : first_line[3],
-            'matrix': matrix_unformated
-        }
+        return True
 
-        return parse_result
+    def __parse_video_size(self):
+        second_line = self.__file.readline().strip().split(' ')
+        video_size = {}
+        for i, value in enumerate(second_line):
+            video_size[i] = int(value)
 
-    def compose_matrix(self, matrix_str):
+        return video_size
 
-        rows = int(self.get_rows())
-        cols = int(self.get_cols())
+    def __parse_endpoints(self):
+        latency = [k for k in range (0,self.n_endpoints)]
 
-        matrix = [[0 for x in range(cols)] for y in range(rows)]
+        for x in range(0, self.n_endpoints):
+            endpoint_settings_line = self.__file.readline().strip().split(' ')
+            self.datacenter[x] = int(endpoint_settings_line[0])
+            n_caches = int(endpoint_settings_line[1])
+            latency[x] = [0 for k in range(0, self.n_caches)]
+            for y in range(0, n_caches):
+                endpoint_x_setting = self.__file.readline().strip().split(' ')
+                index = int(endpoint_x_setting[0])      #cache number
+                value = int(endpoint_x_setting[1])      #latency
+                latency[x][index] = value
 
-        matrix_formatted = []
+        return latency
 
-        for col in matrix_str:
-            matrix_formatted.append(col.strip())
+    def __parse_requests(self):
+        requests = [[0 for k in range(0, self.n_videos)] for y in range(self.n_endpoints)]
 
-        for x, col in enumerate(matrix_formatted):
-            for y, letter in enumerate(col):
-                matrix[x][y] = letter
+        for x in range(0, self.n_req_desc):
+            request_settings = self.__file.readline().strip().split(' ')
 
-        return matrix
+            video_number = int(request_settings[0])         # video number
+            endpoint_number = int(request_settings[1])      # endpoint number
+            request_value = int(request_settings[2])        # request
+            requests[endpoint_number][video_number] = request_value
 
-    def get_matrix(self):
-        return self.__matrix
+        return requests
 
-    def get_min(self):
-        return self.__min
-
-    def get_max(self):
-        return self.__max
-
-    def get_rows(self):
-        return self.__rows
-
-    def get_cols(self):
-        return self.__cols

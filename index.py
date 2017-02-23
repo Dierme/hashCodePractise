@@ -1,9 +1,7 @@
 from models.taskReader import TaskReader
 
-inputPath = 'input/small.in'
+inputPath = 'input/input.txt'
 
 taskInput = TaskReader(inputPath)
 
-matrix = taskInput.get_matrix()
-
-print(matrix)
+print(taskInput.requests)
