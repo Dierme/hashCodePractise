@@ -34,7 +34,7 @@ class TaskReader(object):
 
     def __parse_video_size(self):
         second_line = self.__file.readline().strip().split(' ')
-        video_size = {}
+        video_size = [k for k in range(0, self.n_videos)]
         for i, value in enumerate(second_line):
             video_size[i] = int(value)
 
